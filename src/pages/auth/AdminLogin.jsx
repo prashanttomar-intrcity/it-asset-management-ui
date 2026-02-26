@@ -1,47 +1,33 @@
-import React, { useState } from "react";
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Paper,
-  CircularProgress,
-} from "@mui/material";
-import { useForm } from "react-hook-form";
+import { Box, Card, TextField, Button, Typography, Alert } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-// import api from "../../api/axios"; // will use later
+import { useContext, useState } from "react";
+import { AuthContext } from "../../context/AuthContext";
 
-function AdminLogin() {
+export default function AdminLogin() {
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
-
-  const onSubmit = async (data) => {
-    setLoading(true);
+  const handleLogin = async () => {
     setError("");
-
+    setLoading(true);
     try {
-      // 🔗 API CALL (commented for now)
-      /*
-      const response = await api.post("/admin/login", data);
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("role", "admin");
-      */
+      const user = await login({ email, password });
 
-      // ✅ TEMP: simulate successful login
-      setTimeout(() => {
-        setLoading(false);
+      // 🔀 Redirect based on role
+      if (user.role === "admin") {
         navigate("/admin/dashboard");
-      }, 1000);
+      } else {
+        navigate("/user/dashboard");
+      }
     } catch (err) {
+      setError(err.response?.data?.error || "Login failed");
+    } finally {
       setLoading(false);
-      setError("Invalid email or password");
     }
   };
 
@@ -49,80 +35,48 @@ function AdminLogin() {
     <Box
       sx={{
         minHeight: "100vh",
+        bgcolor: "#f4f5f7",
         display: "flex",
-        justifyContent: "center",
         alignItems: "center",
-        background: "linear-gradient(135deg, #0f2027, #203a43, #2c5364)",
+        justifyContent: "center",
       }}
     >
-      <Paper elevation={6} sx={{ padding: 4, width: 360 }}>
-        <Typography variant="h5" align="center" gutterBottom>
-          Admin Login
+      <Card sx={{ p: 4, width: 380 }}>
+        <Typography variant="h5" mb={3} fontWeight="bold">
+          Login
         </Typography>
 
-        <Typography
-          variant="body2"
-          align="center"
-          color="text.secondary"
-          gutterBottom
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+        <TextField
+          fullWidth
+          label="Email"
+          placeholder="ritesh@company.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          sx={{ mb: 2 }}
+        />
+
+        <TextField
+          fullWidth
+          type="password"
+          label="Password"
+          placeholder="********"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          sx={{ mb: 3 }}
+        />
+
+        <Button
+          fullWidth
+          variant="contained"
+          size="large"
+          onClick={handleLogin}
+          disabled={!email || !password || loading}
         >
-          IT Asset Management System
-        </Typography>
-
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} mt={3}>
-          {/* Email */}
-          <TextField
-            fullWidth
-            label="Email"
-            margin="normal"
-            {...register("email", {
-              required: "Email is required",
-              pattern: {
-                value: /^\S+@\S+$/i,
-                message: "Enter a valid email",
-              },
-            })}
-            error={!!errors.email}
-            helperText={errors.email?.message}
-          />
-
-          {/* Password */}
-          <TextField
-            fullWidth
-            type="password"
-            label="Password"
-            margin="normal"
-            {...register("password", {
-              required: "Password is required",
-              minLength: {
-                value: 6,
-                message: "Minimum 6 characters",
-              },
-            })}
-            error={!!errors.password}
-            helperText={errors.password?.message}
-          />
-
-          {error && (
-            <Typography color="error" variant="body2" mt={1}>
-              {error}
-            </Typography>
-          )}
-
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            type="submit"
-            sx={{ mt: 3 }}
-            disabled={loading}
-          >
-            {loading ? <CircularProgress size={24} /> : "Login"}
-          </Button>
-        </Box>
-      </Paper>
+          {loading ? "Logging in..." : "Login"}
+        </Button>
+      </Card>
     </Box>
   );
 }
-
-export default AdminLogin;

@@ -8,143 +8,60 @@ import {
   Chip,
   ToggleButton,
   ToggleButtonGroup,
+  CircularProgress,
+  Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import AssignAssetModal from "../../components/AssignAssetModal";
-
-/* FIXED SIZES */
-const CARD_HEIGHT = 360;
-const IMAGE_HEIGHT = 180;
-
-/* ASSETS DATA */
-const assetsData = [
-  {
-    id: "AST-L-001",
-    type: "Laptop",
-    name: "Dell Latitude 5420",
-    serial: "ABC123",
-    status: "Not Assigned",
-    image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8",
-  },
-  {
-    id: "AST-L-002",
-    type: "Laptop",
-    name: "HP EliteBook 840",
-    serial: "XYZ789",
-    status: "Assigned",
-    image: "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04",
-  },
-  {
-    id: "AST-L-003",
-    type: "Laptop",
-    name: "Lenovo ThinkPad X1",
-    serial: "LEN456",
-    status: "Not Assigned",
-    image: "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2",
-  },
-  {
-    id: "AST-L-004",
-    type: "Laptop",
-    name: "Apple MacBook Pro",
-    serial: "MAC999",
-    status: "Assigned",
-    image: "https://images.unsplash.com/photo-1518770660439-4636190af475",
-  },
-  {
-    id: "AST-L-005",
-    type: "Laptop",
-    name: "ASUS ZenBook 14",
-    serial: "ASU321",
-    status: "Not Assigned",
-    image: "https://images.unsplash.com/photo-1517430816045-df4b7de11d1d",
-  },
-
-  {
-    id: "AST-S-001",
-    type: "Server",
-    name: "Dell PowerEdge R740",
-    serial: "SRV001",
-    status: "Assigned",
-    image: "https://images.unsplash.com/photo-1581092918367-7a1f7b0b6f88",
-  },
-  {
-    id: "AST-S-002",
-    type: "Server",
-    name: "HP ProLiant DL380",
-    serial: "SRV002",
-    status: "Not Assigned",
-    image: "https://images.unsplash.com/photo-1581090700227-1e37b190418e",
-  },
-
-  {
-    id: "AST-R-001",
-    type: "Router",
-    name: "Cisco ISR 4451",
-    serial: "RTR001",
-    status: "Assigned",
-    image: "https://images.unsplash.com/photo-1603791440384-56cd371ee9a7",
-  },
-  {
-    id: "AST-R-002",
-    type: "Router",
-    name: "Juniper MX480",
-    serial: "RTR002",
-    status: "Not Assigned",
-    image: "https://images.unsplash.com/photo-1603791440384-56cd371ee9a7",
-  },
-
-  {
-    id: "AST-C-001",
-    type: "CCTV",
-    name: "Hikvision Dome Camera",
-    serial: "CCTV01",
-    status: "Assigned",
-    image: "https://images.unsplash.com/photo-1580894908361-967195033215",
-  },
-  {
-    id: "AST-C-002",
-    type: "CCTV",
-    name: "CP Plus Bullet Camera",
-    serial: "CCTV02",
-    status: "Not Assigned",
-    image: "https://images.unsplash.com/photo-1580894908361-967195033215",
-  },
-];
+import { getAssets, deleteAsset } from "../../api/assets.api";
 
 export default function AllAssets() {
   const navigate = useNavigate();
-
   const [filter, setFilter] = useState("Laptop");
-  const [assets, setAssets] = useState(assetsData);
+  const [assets, setAssets] = useState([]);
   const [openAssign, setOpenAssign] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const filteredAssets = assets.filter((a) => a.type === filter);
+  useEffect(() => {
+    fetchAssets();
+  }, [filter]);
 
-  const openAssignModal = (asset) => {
-    setSelectedAsset(asset);
-    setOpenAssign(true);
+  const fetchAssets = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const res = await getAssets({ category: filter });
+      setAssets(res.data.data || []);
+    } catch {
+      setError("Failed to load assets");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleAssign = (user) => {
-    setAssets((prev) =>
-      prev.map((a) =>
-        a.id === selectedAsset.id ? { ...a, status: "Assigned" } : a,
-      ),
-    );
-    setOpenAssign(false);
-  };
-
-  const handleUnassign = () => {
-    setAssets((prev) =>
-      prev.map((a) =>
-        a.id === selectedAsset.id ? { ...a, status: "Not Assigned" } : a,
-      ),
-    );
-    setOpenAssign(false);
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      setDeleteLoading(true);
+      await deleteAsset(deleteTarget.id);
+      setDeleteTarget(null);
+      fetchAssets();
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to delete asset");
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   return (
@@ -155,86 +72,113 @@ export default function AllAssets() {
         <Navbar />
 
         <Box sx={{ p: 4 }}>
-          <Typography variant="h4" fontWeight="bold" mb={3}>
-            All Assets
-          </Typography>
-
-          <ToggleButtonGroup
-            value={filter}
-            exclusive
-            onChange={(e, v) => v && setFilter(v)}
-            sx={{ mb: 4 }}
+          {/* Header */}
+          <Box
+            sx={{
+              mb: 3,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
           >
-            <ToggleButton value="Laptop">Laptop</ToggleButton>
-            <ToggleButton value="Server">Server</ToggleButton>
-            <ToggleButton value="Router">Router</ToggleButton>
-            <ToggleButton value="CCTV">CCTV</ToggleButton>
-          </ToggleButtonGroup>
+            <Typography variant="h4" fontWeight="bold">
+              Assets
+            </Typography>
 
-          <Grid container spacing={4}>
-            {filteredAssets.map((asset) => (
+            <ToggleButtonGroup
+              value={filter}
+              exclusive
+              onChange={(e, v) => v && setFilter(v)}
+              sx={{ bgcolor: "#fff", borderRadius: 2, boxShadow: 1 }}
+            >
+              <ToggleButton value="Laptop">💻 Laptop</ToggleButton>
+              <ToggleButton value="Server">🖥️ Server</ToggleButton>
+              <ToggleButton value="Router">📡 Router</ToggleButton>
+              <ToggleButton value="CCTV">📷 CCTV</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+
+          {/* States */}
+          {loading && (
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
+              <CircularProgress />
+            </Box>
+          )}
+          {error && <Alert severity="error">{error}</Alert>}
+          {!loading && !error && assets.length === 0 && (
+            <Alert severity="info">No assets found for this category.</Alert>
+          )}
+
+          {/* Cards */}
+          <Grid container spacing={3} sx={{ mt: 1 }}>
+            {assets.map((asset) => (
               <Grid item xs={12} sm={6} md={4} lg={3} key={asset.id}>
                 <Card
                   sx={{
-                    height: CARD_HEIGHT,
+                    height: 240,
+                    borderRadius: 3,
+                    boxShadow: 2,
+                    transition: "0.25s",
                     display: "flex",
                     flexDirection: "column",
-                    borderRadius: 4,
-                    overflow: "hidden",
-                    boxShadow: 4,
+                    justifyContent: "space-between",
+                    "&:hover": {
+                      boxShadow: 6,
+                      transform: "translateY(-6px)",
+                    },
                   }}
                 >
-                  <Box
-                    sx={{
-                      height: IMAGE_HEIGHT,
-                      backgroundImage: `url(${asset.image})`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                    }}
-                  />
+                  <CardContent>
+                    <Typography fontWeight="bold" fontSize={16}>
+                      {asset.brand} {asset.model_id}
+                    </Typography>
 
-                  <CardContent
-                    sx={{
-                      flexGrow: 1,
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <Box>
-                      <Typography fontWeight="bold">{asset.name}</Typography>
-                      <Typography variant="body2">
-                        Serial: {asset.serial}
-                      </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Serial: {asset.serial_number}
+                    </Typography>
 
+                    <Box sx={{ mt: 1 }}>
                       <Chip
-                        label={asset.status}
-                        color={
-                          asset.status === "Assigned" ? "success" : "warning"
-                        }
+                        label={asset.assigned_to ? "Assigned" : "Not Assigned"}
+                        color={asset.assigned_to ? "success" : "warning"}
                         size="small"
-                        sx={{ mt: 1 }}
                       />
                     </Box>
-
-                    <Box sx={{ display: "flex", gap: 1 }}>
-                      <Button
-                        fullWidth
-                        variant="outlined"
-                        onClick={() => navigate(`/admin/assets/${asset.id}`)}
-                      >
-                        Details
-                      </Button>
-
-                      <Button
-                        fullWidth
-                        variant="contained"
-                        onClick={() => openAssignModal(asset)}
-                      >
-                        {asset.status === "Assigned" ? "Manage" : "Assign"}
-                      </Button>
-                    </Box>
                   </CardContent>
+
+                  <Box sx={{ p: 2, display: "flex", gap: 1 }}>
+                    <Button
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      onClick={() => navigate(`/admin/assets/${asset.id}`)}
+                    >
+                      Details
+                    </Button>
+
+                    <Button
+                      fullWidth
+                      size="small"
+                      variant="contained"
+                      onClick={() => {
+                        setSelectedAsset(asset);
+                        setOpenAssign(true);
+                      }}
+                    >
+                      {asset.assigned_to ? "Manage" : "Assign"}
+                    </Button>
+
+                    <Button
+                      fullWidth
+                      size="small"
+                      color="error"
+                      variant="outlined"
+                      disabled={!!asset.assigned_to}
+                      onClick={() => setDeleteTarget(asset)}
+                    >
+                      Delete
+                    </Button>
+                  </Box>
                 </Card>
               </Grid>
             ))}
@@ -242,15 +186,40 @@ export default function AllAssets() {
         </Box>
       </Box>
 
+      {/* Assign Modal */}
       {selectedAsset && (
         <AssignAssetModal
           open={openAssign}
           asset={selectedAsset}
           onClose={() => setOpenAssign(false)}
-          onAssign={handleAssign}
-          onUnassign={handleUnassign}
+          onSuccess={fetchAssets}
         />
       )}
+
+      {/* Delete Confirmation */}
+      <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
+        <DialogTitle>Delete Asset</DialogTitle>
+        <DialogContent>
+          Are you sure you want to delete{" "}
+          <b>
+            {deleteTarget?.brand} {deleteTarget?.model_id}
+          </b>
+          ?
+          <br />
+          This action cannot be undone.
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteTarget(null)}>Cancel</Button>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={handleDelete}
+            disabled={deleteLoading}
+          >
+            {deleteLoading ? "Deleting..." : "Delete"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

@@ -1,8 +1,63 @@
-import { Box, Paper, Typography, TextField, Button } from "@mui/material";
+import {
+  Box,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  Alert,
+  MenuItem,
+} from "@mui/material";
+import { useState } from "react";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
+import { createUser } from "../../api/users.api";
 
 export default function CreateUser() {
+  const [form, setForm] = useState({
+    emp_id: "",
+    name: "",
+    email: "",
+    password: "",
+    role: "user",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async () => {
+    setError("");
+    setSuccess("");
+
+    if (!form.emp_id || !form.name || !form.email || !form.password) {
+      setError("All fields are required");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await createUser(form);
+      setSuccess("✅ User created successfully!");
+      setForm({
+        emp_id: "",
+        name: "",
+        email: "",
+        password: "",
+        role: "user",
+      });
+    } catch (err) {
+      setError(
+        err.response?.data?.errors?.join(", ") || "Failed to create user"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -22,16 +77,63 @@ export default function CreateUser() {
               Create User
             </Typography>
 
-            <TextField fullWidth label="Employee ID" sx={{ mb: 2 }} />
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
 
-            <TextField fullWidth label="Full Name" sx={{ mb: 2 }} />
+            {success && (
+              <Alert severity="success" sx={{ mb: 2 }}>
+                {success}
+              </Alert>
+            )}
 
-            <TextField fullWidth label="Email" type="email" sx={{ mb: 3 }} />
+            <TextField
+              fullWidth
+              label="Employee ID"
+              name="emp_id"
+              value={form.emp_id}
+              onChange={handleChange}
+              sx={{ mb: 2 }}
+            />
 
-            <TextField fullWidth label="Password" sx={{ mb: 2 }} />
+            <TextField
+              fullWidth
+              label="Full Name"
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              sx={{ mb: 2 }}
+            />
 
-            <Button variant="contained" fullWidth>
-              Create User
+            <TextField
+              fullWidth
+              label="Email"
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              sx={{ mb: 2 }}
+            />
+
+            <TextField
+              fullWidth
+              label="Password"
+              type="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              sx={{ mb: 3 }}
+            />
+
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={handleSubmit}
+              disabled={loading}
+            >
+              {loading ? "Creating..." : "Create User"}
             </Button>
           </Paper>
         </Box>

@@ -6,36 +6,39 @@ import {
   Button,
   Grid,
   Chip,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import AssignModal from "../../components/AssignModal";
-
-const laptops = [
-  {
-    id: "AST-001",
-    brand: "Dell",
-    model: "Latitude 5420",
-    serial: "ABC123",
-    status: "Not Assigned",
-    image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8",
-  },
-  {
-    id: "AST-002",
-    brand: "HP",
-    model: "EliteBook",
-    serial: "XYZ789",
-    status: "Assigned",
-    image: "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04",
-  },
-];
+import { getAssets } from "../../api/assets.api";
 
 export default function AssetList() {
   const navigate = useNavigate();
+  const [assets, setAssets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [assignOpen, setAssignOpen] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState(null);
+
+  const fetchLaptops = async () => {
+    try {
+      setLoading(true);
+      const res = await getAssets({ category: "Laptop" });
+      setAssets(res.data.data);
+    } catch (err) {
+      setError("Failed to load assets");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLaptops();
+  }, []);
 
   const handleAssignOpen = (asset) => {
     setSelectedAsset(asset);
@@ -65,9 +68,12 @@ export default function AssetList() {
             Laptop Assets
           </Typography>
 
+          {loading && <CircularProgress />}
+          {error && <Alert severity="error">{error}</Alert>}
+
           <Grid container spacing={4}>
-            {laptops.map((laptop) => (
-              <Grid item xs={12} md={4} key={laptop.id}>
+            {assets.map((asset) => (
+              <Grid item xs={12} md={4} key={asset.id}>
                 <Card
                   sx={{
                     borderRadius: 3,
@@ -79,31 +85,19 @@ export default function AssetList() {
                     },
                   }}
                 >
-                  {/* IMAGE AREA */}
-                  <Box
-                    sx={{
-                      height: 160,
-                      backgroundImage: `url(${laptop.image})`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                    }}
-                  />
-
                   <CardContent>
                     <Typography variant="h6" fontWeight="bold">
-                      {laptop.brand} {laptop.model}
+                      {asset.brand} {asset.model_id}
                     </Typography>
 
                     <Typography variant="body2" color="text.secondary">
-                      Serial: {laptop.serial}
+                      Serial: {asset.serial_number}
                     </Typography>
 
                     <Box sx={{ mt: 1 }}>
                       <Chip
-                        label={laptop.status}
-                        color={
-                          laptop.status === "Assigned" ? "success" : "warning"
-                        }
+                        label={asset.asset_status || "Not Assigned"}
+                        color={asset.assigned_to ? "success" : "warning"}
                         size="small"
                       />
                     </Box>
@@ -112,16 +106,16 @@ export default function AssetList() {
                       <Button
                         size="small"
                         variant="outlined"
-                        onClick={() => navigate(`/admin/assets/${laptop.id}`)}
+                        onClick={() => navigate(`/admin/assets/${asset.id}`)}
                       >
                         Details
                       </Button>
 
-                      {laptop.status === "Not Assigned" && (
+                      {!asset.assigned_to && (
                         <Button
                           size="small"
                           variant="contained"
-                          onClick={() => handleAssignOpen(laptop)}
+                          onClick={() => handleAssignOpen(asset)}
                         >
                           Assign To
                         </Button>
@@ -141,6 +135,7 @@ export default function AssetList() {
           open={assignOpen}
           onClose={handleAssignClose}
           asset={selectedAsset}
+          onSuccess={fetchLaptops}
         />
       )}
     </Box>

@@ -1,14 +1,34 @@
-import { Box, Card, TextField, Button, Typography } from "@mui/material";
+import { Box, Card, TextField, Button, Typography, Alert } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { AuthContext } from "../../context/AuthContext";
 
 export default function UserLogin() {
   const navigate = useNavigate();
-  const [userId, setUserId] = useState("");
+  const { login } = useContext(AuthContext);
 
-  const handleLogin = () => {
-    // mock login
-    navigate(`/user/dashboard/${userId}`);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleLogin = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      const user = await login({ email, password });
+
+      // 🔀 Redirect based on role
+      if (user.role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/user/dashboard");
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || "Login failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -21,17 +41,29 @@ export default function UserLogin() {
         justifyContent: "center",
       }}
     >
-      <Card sx={{ p: 4, width: 360 }}>
+      <Card sx={{ p: 4, width: 380 }}>
         <Typography variant="h5" mb={3} fontWeight="bold">
-          User Login
+          Login
         </Typography>
+
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
         <TextField
           fullWidth
-          label="Employee ID"
-          placeholder="EMP001"
-          value={userId}
-          onChange={(e) => setUserId(e.target.value)}
+          label="Email"
+          placeholder="ritesh@company.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          sx={{ mb: 2 }}
+        />
+
+        <TextField
+          fullWidth
+          type="password"
+          label="Password"
+          placeholder="********"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           sx={{ mb: 3 }}
         />
 
@@ -40,9 +72,9 @@ export default function UserLogin() {
           variant="contained"
           size="large"
           onClick={handleLogin}
-          disabled={!userId}
+          disabled={!email || !password || loading}
         >
-          Login
+          {loading ? "Logging in..." : "Login"}
         </Button>
       </Card>
     </Box>
