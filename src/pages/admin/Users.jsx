@@ -25,6 +25,12 @@ import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import { getUsers, deleteUser } from "../../api/users.api";
 import { getAssets } from "../../api/assets.api";
+import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
+import LaptopMacIcon from "@mui/icons-material/LaptopMac";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 export default function Users() {
   const navigate = useNavigate();
@@ -84,24 +90,92 @@ export default function Users() {
       <Box sx={{ flex: 1 }}>
         <Navbar />
 
-        <Box sx={{ p: 4 }}>
-          <Typography variant="h4" fontWeight="bold" mb={3}>
-            Users
-          </Typography>
+        <Box sx={{ p: 4, maxWidth: 1400, mx: "auto" }}>
+          {/* Header */}
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h4" fontWeight={700}>
+              Users
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              View employees and manage assigned assets
+            </Typography>
+          </Box>
 
-          {loading && <CircularProgress />}
+          {/* Loading */}
+          {loading && (
+            <Box
+              sx={{
+                height: "40vh",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          )}
+
+          {/* Error */}
           {error && <Alert severity="error">{error}</Alert>}
 
-          {!loading && !error && (
-            <Paper sx={{ borderRadius: 3, overflow: "hidden", boxShadow: 3 }}>
-              <Table>
-                <TableHead sx={{ bgcolor: "#f0f1f3" }}>
+          {/* Empty */}
+          {!loading && !error && users.length === 0 && (
+            <Alert severity="info">No users found.</Alert>
+          )}
+
+          {/* Table */}
+          {!loading && !error && users.length > 0 && (
+            <Paper
+              sx={{
+                borderRadius: 4,
+                overflow: "hidden",
+                boxShadow: "0 12px 24px rgba(0,0,0,0.08)",
+              }}
+            >
+              <Table sx={{ "& td, & th": { py: 2 } }}>
+                <TableHead sx={{ bgcolor: "#f8fafc" }}>
                   <TableRow>
-                    <TableCell><b>Employee ID</b></TableCell>
-                    <TableCell><b>Name</b></TableCell>
-                    <TableCell><b>Email</b></TableCell>
-                    <TableCell><b>Assigned Laptop</b></TableCell>
-                    <TableCell align="right"><b>Actions</b></TableCell>
+                    <TableCell>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <BadgeOutlinedIcon fontSize="small" />
+                        <Typography fontWeight={600}>Employee ID</Typography>
+                      </Box>
+                    </TableCell>
+
+                    <TableCell>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <PersonOutlineIcon fontSize="small" />
+                        <Typography fontWeight={600}>Name</Typography>
+                      </Box>
+                    </TableCell>
+
+                    <TableCell>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <EmailOutlinedIcon fontSize="small" />
+                        <Typography fontWeight={600}>Email</Typography>
+                      </Box>
+                    </TableCell>
+
+                    <TableCell>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <LaptopMacIcon fontSize="small" />
+                        <Typography fontWeight={600}>Assigned Asset</Typography>
+                      </Box>
+                    </TableCell>
+
+                    <TableCell align="right">
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                          justifyContent: "flex-end",
+                        }}
+                      >
+                        <InfoOutlinedIcon fontSize="small" />
+                        <Typography fontWeight={600}>Actions</Typography>
+                      </Box>
+                    </TableCell>
                   </TableRow>
                 </TableHead>
 
@@ -114,19 +188,54 @@ export default function Users() {
                       <TableRow
                         key={user.id}
                         hover
-                        sx={{ cursor: "pointer", "&:hover": { bgcolor: "#f9fafb" } }}
+                        sx={{
+                          cursor: "pointer",
+                          transition: "0.2s ease",
+                          "&:hover": {
+                            bgcolor: "#f9fafb",
+                          },
+                        }}
                         onClick={() => navigate(`/admin/users/${user.emp_id}`)}
                       >
-                        <TableCell>{user.emp_id}</TableCell>
-                        <TableCell>{user.name}</TableCell>
-                        <TableCell>{user.email}</TableCell>
+                        <TableCell>
+                          <Chip
+                            size="small"
+                            label={user.emp_id}
+                            variant="outlined"
+                            sx={{ fontWeight: 600 }}
+                          />
+                        </TableCell>
+
+                        <TableCell>
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                            <PeopleAltOutlinedIcon
+                              fontSize="small"
+                              sx={{ color: "text.secondary" }}
+                            />
+                            <Typography fontWeight={600}>{user.name}</Typography>
+                          </Box>
+                        </TableCell>
+
+                        <TableCell>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            noWrap
+                          >
+                            {user.email}
+                          </Typography>
+                        </TableCell>
+
                         <TableCell>
                           {asset ? (
-                            <Tooltip title={`${asset.brand} ${asset.model_id} • ${asset.serial_number}`}>
+                            <Tooltip
+                              title={`${asset.brand} ${asset.model_id} • ${asset.serial_number}`}
+                            >
                               <Chip
                                 label={`Assigned (${asset.asset_tag})`}
                                 color="success"
                                 size="small"
+                                variant="outlined"
                               />
                             </Tooltip>
                           ) : (
@@ -134,18 +243,30 @@ export default function Users() {
                           )}
                         </TableCell>
 
-                        <TableCell align="right" onClick={(e) => e.stopPropagation()}>
-                          <Tooltip title={canDelete ? "Delete user" : "Unassign asset first"}>
-                            <span>
-                              <IconButton
-                                color="error"
-                                disabled={!canDelete}
-                                onClick={() => setDeleteTarget(user)}
-                              >
-                                <DeleteOutlineIcon />
-                              </IconButton>
-                            </span>
-                          </Tooltip>
+                        <TableCell
+                          align="right"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                            <Tooltip
+                              title={
+                                canDelete
+                                  ? "Delete user"
+                                  : "Unassign asset first"
+                              }
+                            >
+                              <span>
+                                <IconButton
+                                  color="error"
+                                  size="small"
+                                  disabled={!canDelete}
+                                  onClick={() => setDeleteTarget(user)}
+                                >
+                                  <DeleteOutlineIcon />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
+                          </Box>
                         </TableCell>
                       </TableRow>
                     );

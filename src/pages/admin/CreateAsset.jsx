@@ -76,7 +76,6 @@ export default function CreateAsset() {
     setForm((prev) => ({
       ...prev,
       asset_category: newType,
-      // Reset laptop-specific fields when category changes
       configuration: "",
       operating_system: "",
       cpu_core: "",
@@ -91,9 +90,10 @@ export default function CreateAsset() {
     try {
       await createAsset(form);
       setSuccess("✅ Asset created successfully!");
-      // Keep current category, reset everything else
+
+      // Reset form (keep current category)
       setForm({
-        asset_category: newType, // use the latest category
+        asset_category: assetType,   // ← THIS WAS THE FIX (was 'newType' before)
         brand: "",
         model_id: "",
         serial_number: "",
