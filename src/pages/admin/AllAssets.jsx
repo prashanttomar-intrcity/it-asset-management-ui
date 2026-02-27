@@ -1,45 +1,69 @@
 import {
   Box,
-  Card,
-  CardContent,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Paper,
   Typography,
-  Button,
-  Grid,
   Chip,
-  ToggleButton,
-  ToggleButtonGroup,
   CircularProgress,
   Alert,
+  Tooltip,
+  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  Divider,
+  Button,
+  TableContainer,
+  TablePagination,
+  TextField,
+  InputAdornment,
+  ToggleButton,
+  ToggleButtonGroup,
+  Stack,
 } from "@mui/material";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Sidebar from "../../components/Sidebar";
-import Navbar from "../../components/Navbar";
-import AssignAssetModal from "../../components/AssignAssetModal";
-import { getAssets, deleteAsset } from "../../api/assets.api";
+
+import SearchIcon from "@mui/icons-material/Search";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+
+import AllInboxIcon from "@mui/icons-material/AllInbox";
 import LaptopMacIcon from "@mui/icons-material/LaptopMac";
 import StorageIcon from "@mui/icons-material/Storage";
 import RouterIcon from "@mui/icons-material/Router";
 import VideocamIcon from "@mui/icons-material/Videocam";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import AllInboxIcon from "@mui/icons-material/AllInbox";
+
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import Sidebar from "../../components/Sidebar";
+import Navbar from "../../components/Navbar";
+import AssignAssetModal from "../../components/AssignAssetModal";
+
+import { getAssets, deleteAsset } from "../../api/assets.api";
 
 export default function AllAssets() {
   const navigate = useNavigate();
-  const [filter, setFilter] = useState("ALL");
+
   const [assets, setAssets] = useState([]);
-  const [openAssign, setOpenAssign] = useState(false);
-  const [selectedAsset, setSelectedAsset] = useState(null);
-  const [deleteTarget, setDeleteTarget] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [filter, setFilter] = useState("ALL");
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [page, setPage] = useState(0);
+  const rowsPerPage = 5; // 🔒 FIXED
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [selectedAsset, setSelectedAsset] = useState(null);
+  const [openAssign, setOpenAssign] = useState(false);
+
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
@@ -52,13 +76,24 @@ export default function AllAssets() {
       setError("");
       const params = filter === "ALL" ? {} : { category: filter };
       const res = await getAssets(params);
-      setAssets(res.data.data || []);
+      setAssets(res.data?.data || []);
     } catch {
       setError("Failed to load assets");
     } finally {
       setLoading(false);
     }
   };
+
+  const filteredAssets = assets.filter((a) =>
+    `${a.asset_tag} ${a.brand} ${a.model_id} ${a.serial_number}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase()),
+  );
+
+  const paginatedAssets = filteredAssets.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage,
+  );
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -67,6 +102,7 @@ export default function AllAssets() {
       await deleteAsset(deleteTarget.id);
       setDeleteTarget(null);
       fetchAssets();
+      setPage(0);
     } catch (err) {
       setError(err.response?.data?.error || "Failed to delete asset");
     } finally {
@@ -75,67 +111,86 @@ export default function AllAssets() {
   };
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#eef1f6" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#f4f5f7" }}>
       <Sidebar />
 
-      <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
+      <Box sx={{ flex: 1 }}>
         <Navbar />
 
-        <Box sx={{ p: 3, maxWidth: 1400, mx: "auto", width: "100%" }}>
+        <Box sx={{ p: 4, maxWidth: 1500, mx: "auto" }}>
           {/* Header */}
           <Box
             sx={{
-              mb: 3,
+              mb: 4,
               display: "flex",
               justifyContent: "space-between",
-              alignItems: "center",
               flexWrap: "wrap",
-              gap: 2,
+              gap: 3,
             }}
           >
             <Box>
-              <Typography variant="h5" fontWeight={700}>
+              <Typography variant="h4" fontWeight={700}>
                 Asset Inventory
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Manage, assign and track all company assets
+                View, assign and manage all company assets
               </Typography>
             </Box>
 
-            <ToggleButtonGroup
-              value={filter}
-              exclusive
-              onChange={(e, v) => v && setFilter(v)}
-              sx={{
-                bgcolor: "#fff",
-                borderRadius: 999,
-                p: 0.5,
-                boxShadow: "0 6px 18px rgba(0,0,0,0.08)",
-                "& .MuiToggleButton-root": {
-                  border: "none",
-                  borderRadius: 999,
-                  px: 2,
-                  gap: 1,
-                },
+            <TextField
+              size="small"
+              placeholder="Search by brand, model, serial..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPage(0);
               }}
-            >
-              <ToggleButton value="ALL">
-                <AllInboxIcon fontSize="small" /> All
-              </ToggleButton>
-              <ToggleButton value="Laptop">
-                <LaptopMacIcon fontSize="small" /> Laptop
-              </ToggleButton>
-              <ToggleButton value="Server">
-                <StorageIcon fontSize="small" /> Server
-              </ToggleButton>
-              <ToggleButton value="Router">
-                <RouterIcon fontSize="small" /> Router
-              </ToggleButton>
-              <ToggleButton value="CCTV">
-                <VideocamIcon fontSize="small" /> CCTV
-              </ToggleButton>
-            </ToggleButtonGroup>
+              sx={{ width: 360 }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
           </Box>
+
+          {/* Filters */}
+          <ToggleButtonGroup
+            value={filter}
+            exclusive
+            onChange={(e, v) => v && setFilter(v)}
+            sx={{
+              mb: 3,
+              bgcolor: "#fff",
+              borderRadius: 999,
+              p: 0.5,
+              boxShadow: 2,
+              "& .MuiToggleButton-root": {
+                border: "none",
+                borderRadius: 999,
+                px: 2,
+                gap: 1,
+              },
+            }}
+          >
+            <ToggleButton value="ALL">
+              <AllInboxIcon fontSize="small" /> All
+            </ToggleButton>
+            <ToggleButton value="Laptop">
+              <LaptopMacIcon fontSize="small" /> Laptop
+            </ToggleButton>
+            <ToggleButton value="Server">
+              <StorageIcon fontSize="small" /> Server
+            </ToggleButton>
+            <ToggleButton value="Router">
+              <RouterIcon fontSize="small" /> Router
+            </ToggleButton>
+            <ToggleButton value="CCTV">
+              <VideocamIcon fontSize="small" /> CCTV
+            </ToggleButton>
+          </ToggleButtonGroup>
 
           {/* States */}
           {loading && (
@@ -143,107 +198,169 @@ export default function AllAssets() {
               sx={{
                 height: "40vh",
                 display: "flex",
-                alignItems: "center",
                 justifyContent: "center",
+                alignItems: "center",
               }}
             >
               <CircularProgress />
             </Box>
           )}
+
           {error && <Alert severity="error">{error}</Alert>}
-          {!loading && !error && assets.length === 0 && (
-            <Alert severity="info">No assets found.</Alert>
+
+          {!loading && !error && (
+            <Paper sx={{ borderRadius: 3, boxShadow: 3 }}>
+              <TableContainer>
+                <Table>
+                  <TableHead sx={{ bgcolor: "#f1f3f5" }}>
+                    <TableRow>
+                      <TableCell>
+                        <b>Asset Tag</b>
+                      </TableCell>
+                      <TableCell>
+                        <b>Category</b>
+                      </TableCell>
+                      <TableCell>
+                        <b>Brand / Model</b>
+                      </TableCell>
+                      <TableCell>
+                        <b>Serial</b>
+                      </TableCell>
+                      <TableCell>
+                        <b>Status</b>
+                      </TableCell>
+                      <TableCell>
+                        <b>Assigned To</b>
+                      </TableCell>
+                      <TableCell align="right">
+                        <b>Actions</b>
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+
+                  <TableBody>
+                    {paginatedAssets.map((asset) => (
+                      <TableRow key={asset.id} hover>
+                        <TableCell>{asset.asset_tag}</TableCell>
+                        <TableCell>{asset.category}</TableCell>
+                        <TableCell>
+                          {asset.brand} {asset.model_id}
+                        </TableCell>
+                        <TableCell>{asset.serial_number}</TableCell>
+
+                        <TableCell>
+                          <Chip
+                            size="small"
+                            label={
+                              asset.assigned_to ? "Assigned" : "Not Assigned"
+                            }
+                            color={asset.assigned_to ? "success" : "warning"}
+                          />
+                        </TableCell>
+
+                        {/* 🔥 CLICKABLE USER ID */}
+                        <TableCell>
+                          {asset.assigned_to ? (
+                            <Typography
+                              sx={{
+                                color: "#2563eb",
+                                cursor: "pointer",
+                                fontWeight: 600,
+                                "&:hover": { textDecoration: "underline" },
+                              }}
+                              onClick={() =>
+                                navigate(`/admin/users/${asset.assigned_to}`)
+                              }
+                            >
+                              {asset.assigned_to}
+                            </Typography>
+                          ) : (
+                            "—"
+                          )}
+                        </TableCell>
+
+                        {/* ACTIONS */}
+                        <TableCell align="right">
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            justifyContent="flex-end"
+                          >
+                            <Tooltip title="View details">
+                              <IconButton
+                                onClick={() =>
+                                  navigate(`/admin/assets/${asset.id}`)
+                                }
+                              >
+                                <InfoOutlinedIcon />
+                              </IconButton>
+                            </Tooltip>
+
+                            <Tooltip title="Edit asset">
+                              <IconButton
+                                color="primary"
+                                onClick={() =>
+                                  navigate(`/admin/assets/${asset.id}/edit`)
+                                }
+                              >
+                                <EditOutlinedIcon />
+                              </IconButton>
+                            </Tooltip>
+
+                            <Tooltip
+                              title={
+                                asset.assigned_to
+                                  ? "Manage assignment"
+                                  : "Assign asset"
+                              }
+                            >
+                              <IconButton
+                                color="success"
+                                onClick={() => {
+                                  setSelectedAsset(asset);
+                                  setOpenAssign(true);
+                                }}
+                              >
+                                <AssignmentIndIcon />
+                              </IconButton>
+                            </Tooltip>
+
+                            <Tooltip
+                              title={
+                                asset.assigned_to
+                                  ? "Unassign first"
+                                  : "Delete asset"
+                              }
+                            >
+                              <span>
+                                <IconButton
+                                  color="error"
+                                  disabled={!!asset.assigned_to}
+                                  onClick={() => setDeleteTarget(asset)}
+                                >
+                                  <DeleteOutlineIcon />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
+                          </Stack>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              {/* 🔒 FIXED PAGINATION */}
+              <TablePagination
+                component="div"
+                count={filteredAssets.length}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                rowsPerPageOptions={[]}
+                onPageChange={(e, newPage) => setPage(newPage)}
+              />
+            </Paper>
           )}
-
-          {/* Cards */}
-          <Grid container spacing={2.5}>
-            {assets.map((asset) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={asset.id}>
-                <Card
-                  sx={{
-                    height: "100%",
-                    borderRadius: 3, // 👈 softer, not too round
-                    boxShadow: "0 6px 14px rgba(0,0,0,0.08)",
-                    transition: "0.2s ease",
-                    display: "flex",
-                    flexDirection: "column",
-                    "&:hover": {
-                      boxShadow: "0 10px 22px rgba(0,0,0,0.12)",
-                    },
-                  }}
-                >
-                  {/* Accent bar */}
-                  <Box
-                    sx={{
-                      height: 4,
-                      bgcolor: asset.assigned_to ? "#22c55e" : "#f59e0b",
-                    }}
-                  />
-
-                  <CardContent sx={{ pb: 1.5 }}>
-                    <Typography fontWeight={700} noWrap>
-                      {asset.brand} {asset.model_id}
-                    </Typography>
-
-                    <Typography variant="body2" color="text.secondary" noWrap>
-                      Serial: {asset.serial_number}
-                    </Typography>
-
-                    <Chip
-                      size="small"
-                      variant="outlined"
-                      label={asset.assigned_to ? "Assigned" : "Not Assigned"}
-                      color={asset.assigned_to ? "success" : "warning"}
-                      sx={{ mt: 1 }}
-                    />
-                  </CardContent>
-
-                  <Divider />
-
-                  <Box
-                    sx={{
-                      p: 1.5,
-                      display: "flex",
-                      gap: 1,
-                    }}
-                  >
-                    <Button
-                      size="small"
-                      variant="text"
-                      startIcon={<InfoOutlinedIcon />}
-                      onClick={() => navigate(`/admin/assets/${asset.id}`)}
-                    >
-                      Details
-                    </Button>
-
-                    <Button
-                      size="small"
-                      variant="contained"
-                      startIcon={<AssignmentIndIcon />}
-                      sx={{ ml: "auto" }}
-                      onClick={() => {
-                        setSelectedAsset(asset);
-                        setOpenAssign(true);
-                      }}
-                    >
-                      {asset.assigned_to ? "Manage" : "Assign"}
-                    </Button>
-
-                    <Button
-                      size="small"
-                      color="error"
-                      variant="text"
-                      startIcon={<DeleteOutlineIcon />}
-                      disabled={!!asset.assigned_to}
-                      onClick={() => setDeleteTarget(asset)}
-                    >
-                      Delete
-                    </Button>
-                  </Box>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
         </Box>
       </Box>
 
@@ -261,20 +378,15 @@ export default function AllAssets() {
       <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
         <DialogTitle>Delete Asset</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete{" "}
-          <b>
-            {deleteTarget?.brand} {deleteTarget?.model_id}
-          </b>
-          ?<br />
-          This action cannot be undone.
+          Are you sure you want to delete <b>{deleteTarget?.asset_tag}</b>?
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteTarget(null)}>Cancel</Button>
           <Button
             color="error"
             variant="contained"
-            onClick={handleDelete}
             disabled={deleteLoading}
+            onClick={handleDelete}
           >
             {deleteLoading ? "Deleting..." : "Delete"}
           </Button>

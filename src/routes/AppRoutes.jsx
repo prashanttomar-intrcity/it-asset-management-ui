@@ -11,6 +11,7 @@ import UserDetails from "../pages/admin/UserDetails";
 import AllAssets from "../pages/admin/AllAssets";
 import UserLogin from "../pages/auth/UserLogin";
 import UserDashboard from "../pages/user/UserDashboard";
+import RequireAuth from "../components/RequireAuth";
 
 export default function AppRoutes() {
   return (
@@ -18,7 +19,33 @@ export default function AppRoutes() {
       <Routes>
         <Route path="/admin/login" element={<AdminLogin />} />
 
-        <Route path="/admin/dashboard" element={<Dashboard />} />
+        {/* <Route path="/admin/dashboard" element={<Dashboard />} /> */}
+        <Route
+          path="/admin/dashboard"
+          element={
+            <RequireAuth>
+              <Dashboard />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/admin/assets"
+          element={
+            <RequireAuth>
+              <AllAssets />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/admin/users"
+          element={
+            <RequireAuth>
+              <Users />
+            </RequireAuth>
+          }
+        />
 
         <Route path="/admin/assets/laptops" element={<AssetList />} />
         <Route path="/admin/assets/new" element={<CreateAsset />} />
