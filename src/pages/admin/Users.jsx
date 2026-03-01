@@ -1,4 +1,3 @@
-// 🔥 SAME IMPORTS
 import {
   Box,
   Table,
@@ -51,15 +50,22 @@ export default function Users() {
   const [assignOpen, setAssignOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
-  // 🔥 Default rows changed to 5 (ONLY CHANGE HERE)
+  // ✅ Default rows = 5
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Dialog search + pagination (UNCHANGED)
+  // Dialog search + pagination
   const [assetSearch, setAssetSearch] = useState("");
   const [assetPage, setAssetPage] = useState(0);
   const [assetRowsPerPage, setAssetRowsPerPage] = useState(5);
+
+  // ✅ Minimum height for 5 rows
+  const ROW_HEIGHT = 53;
+  const HEADER_HEIGHT = 56;
+  const PAGINATION_HEIGHT = 52;
+  const MIN_TABLE_HEIGHT =
+    ROW_HEIGHT * 5 + HEADER_HEIGHT + PAGINATION_HEIGHT;
 
   const fetchUsersWithAssignment = async () => {
     try {
@@ -198,8 +204,14 @@ export default function Users() {
           {error && <Alert severity="error">{error}</Alert>}
 
           {!loading && (
-            <Paper>
-              <TableContainer>
+            <Paper
+              sx={{
+                minHeight: MIN_TABLE_HEIGHT,
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <TableContainer sx={{ flex: 1 }}>
                 <Table>
                   <TableHead>
                     <TableRow>
@@ -250,7 +262,6 @@ export default function Users() {
                             )}
                           </TableCell>
 
-                          {/* 🔥 Prevent row navigation when clicking buttons */}
                           <TableCell
                             align="right"
                             onClick={(e) => e.stopPropagation()}
