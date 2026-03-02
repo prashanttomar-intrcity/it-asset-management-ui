@@ -10,10 +10,10 @@ export const getAssetOptions = () => api.get("/meta/asset_options");
 // Create asset (admin)
 export const createAsset = (payload) => api.post("/assets", { asset: payload });
 // Confirm assignment (via email link)
-export const confirmAssignment = (token) =>
-  api.patch(`/asset_assignments/confirm`, null, {
-    params: { token },
-  });
+
+  export const confirmAssignment = (token) => {
+  return api.get(`/asset_assignments/confirm?token=${token}`);
+};
 
 // Update asset (admin)
 export const updateAsset = (id, payload) =>

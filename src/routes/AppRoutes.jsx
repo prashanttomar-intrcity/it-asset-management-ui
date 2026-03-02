@@ -58,7 +58,7 @@ export default function AppRoutes() {
         <Route path="/admin/users/new" element={<CreateUser />} />
         <Route path="/admin/users/:userId" element={<UserDetails />} />
         <Route path="/admin/assets" element={<AllAssets />} />
-<Route path="/user/confirm-assignment" element={<ConfirmAssignment />} />
+<Route path="/confirm-assignment" element={<ConfirmAssignment />} />
         <Route path="/user/login" element={<UserLogin />} />
         <Route path="/user/dashboard/:userId" element={<UserDashboard />} />
 
