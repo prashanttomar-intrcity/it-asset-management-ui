@@ -124,7 +124,7 @@ export default function Dashboard() {
 
   const paginatedData = filteredData.slice(
     page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
+    page * rowsPerPage + rowsPerPage,
   );
 
   const handleCloseDialog = () => {
@@ -139,7 +139,14 @@ export default function Dashboard() {
         <Sidebar />
         <Box sx={{ flex: 1 }}>
           <Navbar />
-          <Box sx={{ height: "70vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Box
+            sx={{
+              height: "70vh",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             <CircularProgress size={50} />
           </Box>
         </Box>
@@ -183,13 +190,29 @@ export default function Dashboard() {
 
         <Box sx={{ p: 3, maxWidth: 1400, mx: "auto" }}>
           {/* HEADER */}
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 4,
+            }}
+          >
             <Box>
-              <Typography variant="h4" fontWeight={700} sx={{ letterSpacing: "-0.02em" }}>
+              <Typography
+                variant="h4"
+                fontWeight={700}
+                sx={{ letterSpacing: "-0.02em" }}
+              >
                 Dashboard
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Real-time overview • {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+                Real-time overview •{" "}
+                {new Date().toLocaleDateString("en-US", {
+                  weekday: "long",
+                  month: "long",
+                  day: "numeric",
+                })}
               </Typography>
             </Box>
 
@@ -205,10 +228,34 @@ export default function Dashboard() {
           {/* STAT CARDS */}
           <Grid container spacing={3} mb={5}>
             {[
-              { label: "Total Assets", value: totalAssets, icon: <Inventory />, color: "primary", type: "totalAssets" },
-              { label: "Assigned Assets", value: assignedAssets, icon: <AssignmentTurnedIn />, color: "success", type: "assignedAssets" },
-              { label: "Available Assets", value: availableAssets, icon: <EventAvailable />, color: "warning", type: "availableAssets" },
-              { label: "Total Users", value: totalUsers, icon: <PeopleAlt />, color: "info", type: "users" },
+              {
+                label: "Total Assets",
+                value: totalAssets,
+                icon: <Inventory />,
+                color: "primary",
+                type: "totalAssets",
+              },
+              {
+                label: "Assigned Assets",
+                value: assignedAssets,
+                icon: <AssignmentTurnedIn />,
+                color: "success",
+                type: "assignedAssets",
+              },
+              {
+                label: "Available Assets",
+                value: availableAssets,
+                icon: <EventAvailable />,
+                color: "warning",
+                type: "availableAssets",
+              },
+              {
+                label: "Total Users",
+                value: totalUsers,
+                icon: <PeopleAlt />,
+                color: "info",
+                type: "users",
+              },
             ].map((item) => (
               <Grid item xs={12} sm={6} md={3} key={item.label}>
                 <Card
@@ -232,8 +279,22 @@ export default function Dashboard() {
           </Grid>
 
           {/* ASSETS BY CATEGORY */}
-          <Card sx={{ p: 3, borderRadius: 3, mb: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+          <Card
+            sx={{
+              p: 3,
+              borderRadius: 3,
+              mb: 4,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 3,
+              }}
+            >
               <Typography variant="h6" fontWeight={600}>
                 Assets by Category
               </Typography>
@@ -247,47 +308,71 @@ export default function Dashboard() {
             </Box>
 
             <Grid container spacing={2.5}>
-              {Object.entries(data.assets.by_category).map(([category, count], idx) => (
-                <Grid item xs={6} sm={4} md={2.4} key={category}>
-                  <Box
-                    sx={{
-                      p: 3,
-                      borderRadius: 3,
-                      bgcolor: "#ffffff",
-                      textAlign: "center",
-                      boxShadow: "0 4px 15px rgba(0,0,0,0.04)",
-                      transition: "all 0.2s",
-                      "&:hover": { transform: "translateY(-4px)", boxShadow: "0 12px 30px rgba(0,0,0,0.1)" },
-                      border: "1px solid #f1f5f9",
-                    }}
-                  >
-                    <Typography variant="h3" fontWeight={800} color="primary.main" sx={{ mb: 0.5 }}>
-                      {count}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      fontWeight={600}
-                      sx={{ textTransform: "capitalize", color: "#475569" }}
+              {Object.entries(data.assets.by_category).map(
+                ([category, count], idx) => (
+                  <Grid item xs={6} sm={4} md={2.4} key={category}>
+                    <Box
+                      sx={{
+                        p: 3,
+                        borderRadius: 3,
+                        bgcolor: "#ffffff",
+                        textAlign: "center",
+                        boxShadow: "0 4px 15px rgba(0,0,0,0.04)",
+                        transition: "all 0.2s",
+                        "&:hover": {
+                          transform: "translateY(-4px)",
+                          boxShadow: "0 12px 30px rgba(0,0,0,0.1)",
+                        },
+                        border: "1px solid #f1f5f9",
+                      }}
                     >
-                      {category}
-                    </Typography>
-                  </Box>
-                </Grid>
-              ))}
+                      <Typography
+                        variant="h3"
+                        fontWeight={800}
+                        color="primary.main"
+                        sx={{ mb: 0.5 }}
+                      >
+                        {count}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        fontWeight={600}
+                        sx={{ textTransform: "capitalize", color: "#475569" }}
+                      >
+                        {category}
+                      </Typography>
+                    </Box>
+                  </Grid>
+                ),
+              )}
             </Grid>
           </Card>
 
           {/* DISTRIBUTION CARDS */}
           <Grid container spacing={3} mb={5}>
             <Grid item xs={12} md={6}>
-              <Card sx={{ p: 3, borderRadius: 3, boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}>
+              <Card
+                sx={{
+                  p: 3,
+                  borderRadius: 3,
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+                }}
+              >
                 <Typography variant="h6" fontWeight={600} mb={3}>
                   User Asset Distribution
                 </Typography>
 
                 <Box sx={{ mb: 3 }}>
-                  <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-                    <Typography variant="body2" color="text.secondary">With Assets</Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      mb: 1,
+                    }}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      With Assets
+                    </Typography>
                     <Typography variant="body2" fontWeight={700}>
                       {data.users.with_assets} ({withAssetsPercent}%)
                     </Typography>
@@ -301,8 +386,16 @@ export default function Dashboard() {
                 </Box>
 
                 <Box>
-                  <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-                    <Typography variant="body2" color="text.secondary">Without Assets</Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      mb: 1,
+                    }}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      Without Assets
+                    </Typography>
                     <Typography variant="body2" fontWeight={700}>
                       {data.users.without_assets} ({100 - withAssetsPercent}%)
                     </Typography>
@@ -318,14 +411,28 @@ export default function Dashboard() {
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <Card sx={{ p: 3, borderRadius: 3, boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}>
+              <Card
+                sx={{
+                  p: 3,
+                  borderRadius: 3,
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+                }}
+              >
                 <Typography variant="h6" fontWeight={600} mb={3}>
                   Asset Availability
                 </Typography>
 
                 <Box sx={{ mb: 3 }}>
-                  <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-                    <Typography variant="body2" color="text.secondary">Available</Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      mb: 1,
+                    }}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      Available
+                    </Typography>
                     <Typography variant="body2" fontWeight={700}>
                       {availableAssets} ({availablePercent}%)
                     </Typography>
@@ -339,8 +446,16 @@ export default function Dashboard() {
                 </Box>
 
                 <Box>
-                  <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-                    <Typography variant="body2" color="text.secondary">Assigned</Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      mb: 1,
+                    }}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      Assigned
+                    </Typography>
                     <Typography variant="body2" fontWeight={700}>
                       {assignedAssets} ({assignedPercent}%)
                     </Typography>
@@ -357,7 +472,13 @@ export default function Dashboard() {
           </Grid>
 
           {/* RECENT ACTIVITY */}
-          <Card sx={{ p: 3, borderRadius: 3, boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}>
+          <Card
+            sx={{
+              p: 3,
+              borderRadius: 3,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+            }}
+          >
             <Typography variant="h6" fontWeight={700} mb={3}>
               Recent Assignment Activity
             </Typography>
@@ -404,7 +525,11 @@ export default function Dashboard() {
                     </Box>
 
                     <Box sx={{ textAlign: "right", minWidth: 200 }}>
-                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        gutterBottom
+                      >
                         {item.assigned_from}
                       </Typography>
                       <Chip
@@ -468,13 +593,27 @@ export default function Dashboard() {
           </IconButton>
         </DialogTitle>
 
-        <DialogContent sx={{ p: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <DialogContent
+          sx={{
+            p: 0,
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+          }}
+        >
           {/* SEARCH BAR */}
-          <Box sx={{ p: 4, pb: 3, borderBottom: "1px solid #e2e8f0", bgcolor: "#f8fafc" }}>
+          <Box
+            sx={{
+              p: 4,
+              pb: 3,
+              borderBottom: "1px solid #e2e8f0",
+              bgcolor: "#f8fafc",
+            }}
+          >
             <TextField
               size="medium"
               fullWidth
-              placeholder="Search by name, email, brand, serial..."
+              placeholder="Search by brand, model, serial..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -505,7 +644,14 @@ export default function Dashboard() {
           </Box>
 
           {listLoading ? (
-            <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Box
+              sx={{
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               <CircularProgress size={50} />
             </Box>
           ) : filteredData.length === 0 ? (
@@ -532,31 +678,55 @@ export default function Dashboard() {
                   mb: 3,
                 }}
               >
-                {listType === "users" ? <PeopleAlt sx={{ fontSize: 40 }} /> : <Inventory sx={{ fontSize: 40 }} />}
+                {listType === "users" ? (
+                  <PeopleAlt sx={{ fontSize: 40 }} />
+                ) : (
+                  <Inventory sx={{ fontSize: 40 }} />
+                )}
               </Box>
               <Typography variant="h6" fontWeight={600}>
                 No records found
               </Typography>
-              <Typography variant="body2">Try adjusting your search term</Typography>
+              <Typography variant="body2">
+                Try adjusting your search term
+              </Typography>
             </Box>
           ) : (
             <Box sx={{ flex: 1, overflow: "auto", px: 4, py: 2 }}>
-              <TableContainer component={Paper} elevation={0} sx={{ border: "1px solid #e2e8f0", borderRadius: 2 }}>
+              <TableContainer
+                component={Paper}
+                elevation={0}
+                sx={{ border: "1px solid #e2e8f0", borderRadius: 2 }}
+              >
                 <Table size="medium" stickyHeader>
                   <TableHead>
                     <TableRow sx={{ bgcolor: "#f8fafc" }}>
                       {listData[0]?.emp_id ? (
                         <>
-                          <TableCell sx={{ fontWeight: 700, color: "#334155" }}>Name</TableCell>
-                          <TableCell sx={{ fontWeight: 700, color: "#334155" }}>Email</TableCell>
-                          <TableCell sx={{ fontWeight: 700, color: "#334155" }}>Department</TableCell>
+                          <TableCell sx={{ fontWeight: 700, color: "#334155" }}>
+                            Name
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 700, color: "#334155" }}>
+                            Email
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 700, color: "#334155" }}>
+                            Department
+                          </TableCell>
                         </>
                       ) : (
                         <>
-                          <TableCell sx={{ fontWeight: 700, color: "#334155" }}>Brand</TableCell>
-                          <TableCell sx={{ fontWeight: 700, color: "#334155" }}>Model</TableCell>
-                          <TableCell sx={{ fontWeight: 700, color: "#334155" }}>Serial Number</TableCell>
-                          <TableCell sx={{ fontWeight: 700, color: "#334155" }}>Status</TableCell>
+                          <TableCell sx={{ fontWeight: 700, color: "#334155" }}>
+                            Brand
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 700, color: "#334155" }}>
+                            Model
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 700, color: "#334155" }}>
+                            Serial Number
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 700, color: "#334155" }}>
+                            Status
+                          </TableCell>
                         </>
                       )}
                     </TableRow>
@@ -585,11 +755,18 @@ export default function Dashboard() {
                         >
                           {isUser ? (
                             <>
-                              <TableCell sx={{ fontWeight: 500 }}>{item.name}</TableCell>
+                              <TableCell sx={{ fontWeight: 500 }}>
+                                {item.name}
+                              </TableCell>
                               <TableCell>{item.email}</TableCell>
                               <TableCell>
                                 {item.department ? (
-                                  <Chip label={item.department} size="small" color="primary" variant="outlined" />
+                                  <Chip
+                                    label={item.department}
+                                    size="small"
+                                    color="primary"
+                                    variant="outlined"
+                                  />
                                 ) : (
                                   "—"
                                 )}
@@ -597,14 +774,24 @@ export default function Dashboard() {
                             </>
                           ) : (
                             <>
-                              <TableCell sx={{ fontWeight: 500 }}>{item.brand}</TableCell>
-                              <TableCell>{item.model_id || item.model}</TableCell>
+                              <TableCell sx={{ fontWeight: 500 }}>
+                                {item.brand}
+                              </TableCell>
+                              <TableCell>
+                                {item.model_id || item.model}
+                              </TableCell>
                               <TableCell>{item.serial_number || "—"}</TableCell>
                               <TableCell>
                                 <Chip
-                                  label={item.assigned_to ? `Assigned to ${item.assigned_to}` : "Available"}
+                                  label={
+                                    item.assigned_to
+                                      ? `Assigned to ${item.assigned_to}`
+                                      : "Available"
+                                  }
                                   size="small"
-                                  color={item.assigned_to ? "success" : "warning"}
+                                  color={
+                                    item.assigned_to ? "success" : "warning"
+                                  }
                                   variant="filled"
                                 />
                               </TableCell>
@@ -620,7 +807,14 @@ export default function Dashboard() {
           )}
         </DialogContent>
 
-        <DialogActions sx={{ px: 4, py: 2.5, borderTop: "1px solid #e2e8f0", bgcolor: "#f8fafc" }}>
+        <DialogActions
+          sx={{
+            px: 4,
+            py: 2.5,
+            borderTop: "1px solid #e2e8f0",
+            bgcolor: "#f8fafc",
+          }}
+        >
           <TablePagination
             component="div"
             count={filteredData.length}
@@ -647,9 +841,20 @@ export default function Dashboard() {
 
 // Enhanced Stat Card
 const StatCard = ({ label, value, icon, color }) => (
-  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+  <Box
+    sx={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+    }}
+  >
     <Box>
-      <Typography variant="caption" color="text.secondary" fontWeight={700} sx={{ textTransform: "uppercase", letterSpacing: "0.5px" }}>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        fontWeight={700}
+        sx={{ textTransform: "uppercase", letterSpacing: "0.5px" }}
+      >
         {label}
       </Typography>
       <Typography variant="h3" fontWeight={800} sx={{ mt: 0.5, lineHeight: 1 }}>

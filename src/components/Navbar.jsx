@@ -12,7 +12,7 @@ export default function Navbar() {
 
       if (token) {
         await axios.post(
-          "http://localhost:3000/api/logout",
+          `${process.env.REACT_APP_API_BASE_URL}/api`,
           {},
           {
             headers: {
