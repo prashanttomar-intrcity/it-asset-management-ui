@@ -16,12 +16,7 @@ import { useEffect, useState } from "react";
 import { getUsers } from "../api/users.api";
 import { assignAsset, getAssetHistory, unassignAsset } from "../api/assets.api";
 
-export default function AssignAssetModal({
-  open,
-  onClose,
-  asset,
-  onSuccess,
-}) {
+export default function AssignAssetModal({ open, onClose, asset, onSuccess }) {
   const [users, setUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
@@ -102,7 +97,11 @@ export default function AssignAssetModal({
       </DialogTitle>
 
       <DialogContent>
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
 
         {loadingUsers ? (
           <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
@@ -119,6 +118,7 @@ export default function AssignAssetModal({
                   secondaryAction={
                     isCurrentUser ? (
                       <Button
+                        align="right"
                         color="error"
                         disabled={actionLoading}
                         onClick={handleUnassign}
@@ -142,9 +142,14 @@ export default function AssignAssetModal({
                     secondary={`${user.emp_id} • ${user.email}`}
                   />
 
-                  {isCurrentUser && (
-                    <Chip label="Current Owner" color="success" size="small" />
-                  )}
+                  {/* {isCurrentUser && (
+                    <Chip
+                      align="left"
+                      label="Current Owner"
+                      color="success"
+                      size="small"
+                    />
+                  )} */}
                 </ListItem>
               );
             })}
