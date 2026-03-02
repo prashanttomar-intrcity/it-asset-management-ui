@@ -22,7 +22,7 @@ const linkStyle = {
 const navItems = [
   { label: "Dashboard", path: "/admin/dashboard", icon: <DashboardOutlinedIcon /> },
   { label: "All Assets", path: "/admin/assets", icon: <Inventory2OutlinedIcon /> },
-  { label: "Create Asset", path: "/admin/assets/new", icon: <AddBoxOutlinedIcon /> },
+  { label: "Create Asset", path: "/admin/assets/create", icon: <AddBoxOutlinedIcon /> },
   { label: "Users", path: "/admin/users", icon: <PeopleAltOutlinedIcon /> },
   { label: "Create User", path: "/admin/users/new", icon: <PersonAddAltOutlinedIcon /> },
 ];
