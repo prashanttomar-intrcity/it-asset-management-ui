@@ -12,6 +12,7 @@ import AllAssets from "../pages/admin/AllAssets";
 import UserLogin from "../pages/auth/UserLogin";
 import UserDashboard from "../pages/user/UserDashboard";
 import RequireAuth from "../components/RequireAuth";
+import ConfirmAssignment from "../pages/user/ConfirmAssignment";
 
 export default function AppRoutes() {
   return (
@@ -50,12 +51,14 @@ export default function AppRoutes() {
         <Route path="/admin/assets/laptops" element={<AssetList />} />
         <Route path="/admin/assets/new" element={<CreateAsset />} />
         <Route path="/admin/assets/:id" element={<AssetDetails />} />
+        <Route path="/admin/assets/create" element={<CreateAsset />} />
+        <Route path="/admin/assets/:id/edit" element={<CreateAsset />} />
 
         <Route path="/admin/users" element={<Users />} />
         <Route path="/admin/users/new" element={<CreateUser />} />
         <Route path="/admin/users/:userId" element={<UserDetails />} />
         <Route path="/admin/assets" element={<AllAssets />} />
-
+<Route path="/user/confirm-assignment" element={<ConfirmAssignment />} />
         <Route path="/user/login" element={<UserLogin />} />
         <Route path="/user/dashboard/:userId" element={<UserDashboard />} />
 

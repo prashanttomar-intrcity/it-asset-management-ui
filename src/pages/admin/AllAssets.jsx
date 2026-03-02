@@ -56,7 +56,7 @@ export default function AllAssets() {
   const [error, setError] = useState("");
 
   const [page, setPage] = useState(0);
-  const rowsPerPage = 5; // 🔒 FIXED
+  const rowsPerPage = 5;
 
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -87,12 +87,12 @@ export default function AllAssets() {
   const filteredAssets = assets.filter((a) =>
     `${a.asset_tag} ${a.brand} ${a.model_id} ${a.serial_number}`
       .toLowerCase()
-      .includes(searchTerm.toLowerCase()),
+      .includes(searchTerm.toLowerCase())
   );
 
   const paginatedAssets = filteredAssets.slice(
     page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage,
+    page * rowsPerPage + rowsPerPage
   );
 
   const handleDelete = async () => {
@@ -110,10 +110,25 @@ export default function AllAssets() {
     }
   };
 
+  const getStatusChip = (asset) => {
+    if (!asset.assigned_to) {
+      return <Chip size="small" label="Available" color="default" />;
+    }
+
+    if (asset.assignment_status === "pending") {
+      return <Chip size="small" label="Pending Confirmation" color="warning" />;
+    }
+
+    if (asset.assignment_status === "assigned") {
+      return <Chip size="small" label="Assigned" color="success" />;
+    }
+
+    return <Chip size="small" label="Closed" color="default" />;
+  };
+
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#f4f5f7" }}>
       <Sidebar />
-
       <Box sx={{ flex: 1 }}>
         <Navbar />
 
@@ -167,12 +182,6 @@ export default function AllAssets() {
               borderRadius: 999,
               p: 0.5,
               boxShadow: 2,
-              "& .MuiToggleButton-root": {
-                border: "none",
-                borderRadius: 999,
-                px: 2,
-                gap: 1,
-              },
             }}
           >
             <ToggleButton value="ALL">
@@ -192,16 +201,8 @@ export default function AllAssets() {
             </ToggleButton>
           </ToggleButtonGroup>
 
-          {/* States */}
           {loading && (
-            <Box
-              sx={{
-                height: "40vh",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
+            <Box sx={{ height: "40vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
               <CircularProgress />
             </Box>
           )}
@@ -214,27 +215,13 @@ export default function AllAssets() {
                 <Table>
                   <TableHead sx={{ bgcolor: "#f1f3f5" }}>
                     <TableRow>
-                      <TableCell>
-                        <b>Asset Tag</b>
-                      </TableCell>
-                      <TableCell>
-                        <b>Category</b>
-                      </TableCell>
-                      <TableCell>
-                        <b>Brand / Model</b>
-                      </TableCell>
-                      <TableCell>
-                        <b>Serial</b>
-                      </TableCell>
-                      <TableCell>
-                        <b>Status</b>
-                      </TableCell>
-                      <TableCell>
-                        <b>Assigned To</b>
-                      </TableCell>
-                      <TableCell align="right">
-                        <b>Actions</b>
-                      </TableCell>
+                      <TableCell><b>Asset Tag</b></TableCell>
+                      <TableCell><b>Category</b></TableCell>
+                      <TableCell><b>Brand / Model</b></TableCell>
+                      <TableCell><b>Serial</b></TableCell>
+                      <TableCell><b>Status</b></TableCell>
+                      <TableCell><b>Assigned To</b></TableCell>
+                      <TableCell align="right"><b>Actions</b></TableCell>
                     </TableRow>
                   </TableHead>
 
@@ -242,56 +229,23 @@ export default function AllAssets() {
                     {paginatedAssets.map((asset) => (
                       <TableRow key={asset.id} hover>
                         <TableCell>{asset.asset_tag}</TableCell>
-                        <TableCell>{asset.category}</TableCell>
-                        <TableCell>
-                          {asset.brand} {asset.model_id}
-                        </TableCell>
+                        <TableCell>{asset.asset_category}</TableCell>
+                        <TableCell>{asset.brand} {asset.model_id}</TableCell>
                         <TableCell>{asset.serial_number}</TableCell>
 
                         <TableCell>
-                          <Chip
-                            size="small"
-                            label={
-                              asset.assigned_to ? "Assigned" : "Not Assigned"
-                            }
-                            color={asset.assigned_to ? "success" : "warning"}
-                          />
+                          {getStatusChip(asset)}
                         </TableCell>
 
-                        {/* 🔥 CLICKABLE USER ID */}
                         <TableCell>
-                          {asset.assigned_to ? (
-                            <Typography
-                              sx={{
-                                color: "#2563eb",
-                                cursor: "pointer",
-                                fontWeight: 600,
-                                "&:hover": { textDecoration: "underline" },
-                              }}
-                              onClick={() =>
-                                navigate(`/admin/users/${asset.assigned_to}`)
-                              }
-                            >
-                              {asset.assigned_to}
-                            </Typography>
-                          ) : (
-                            "—"
-                          )}
+                          {asset.assigned_to || "—"}
                         </TableCell>
 
-                        {/* ACTIONS */}
                         <TableCell align="right">
-                          <Stack
-                            direction="row"
-                            spacing={1}
-                            justifyContent="flex-end"
-                          >
+                          <Stack direction="row" spacing={1} justifyContent="flex-end">
+
                             <Tooltip title="View details">
-                              <IconButton
-                                onClick={() =>
-                                  navigate(`/admin/assets/${asset.id}`)
-                                }
-                              >
+                              <IconButton onClick={() => navigate(`/admin/assets/${asset.id}`)}>
                                 <InfoOutlinedIcon />
                               </IconButton>
                             </Tooltip>
@@ -299,39 +253,28 @@ export default function AllAssets() {
                             <Tooltip title="Edit asset">
                               <IconButton
                                 color="primary"
-                                onClick={() =>
-                                  navigate(`/admin/assets/${asset.id}/edit`)
-                                }
+                                onClick={() => navigate(`/admin/assets/${asset.id}/edit`)}
                               >
                                 <EditOutlinedIcon />
                               </IconButton>
                             </Tooltip>
 
-                            <Tooltip
-                              title={
-                                asset.assigned_to
-                                  ? "Manage assignment"
-                                  : "Assign asset"
-                              }
-                            >
-                              <IconButton
-                                color="success"
-                                onClick={() => {
-                                  setSelectedAsset(asset);
-                                  setOpenAssign(true);
-                                }}
-                              >
-                                <AssignmentIndIcon />
-                              </IconButton>
+                            <Tooltip title="Assign asset">
+                              <span>
+                                <IconButton
+                                  color="success"
+                                  disabled={asset.assignment_status === "pending"}
+                                  onClick={() => {
+                                    setSelectedAsset(asset);
+                                    setOpenAssign(true);
+                                  }}
+                                >
+                                  <AssignmentIndIcon />
+                                </IconButton>
+                              </span>
                             </Tooltip>
 
-                            <Tooltip
-                              title={
-                                asset.assigned_to
-                                  ? "Unassign first"
-                                  : "Delete asset"
-                              }
-                            >
+                            <Tooltip title="Delete asset">
                               <span>
                                 <IconButton
                                   color="error"
@@ -342,6 +285,7 @@ export default function AllAssets() {
                                 </IconButton>
                               </span>
                             </Tooltip>
+
                           </Stack>
                         </TableCell>
                       </TableRow>
@@ -350,7 +294,6 @@ export default function AllAssets() {
                 </Table>
               </TableContainer>
 
-              {/* 🔒 FIXED PAGINATION */}
               <TablePagination
                 component="div"
                 count={filteredAssets.length}
@@ -364,7 +307,6 @@ export default function AllAssets() {
         </Box>
       </Box>
 
-      {/* Assign Modal */}
       {selectedAsset && (
         <AssignAssetModal
           open={openAssign}
@@ -374,7 +316,6 @@ export default function AllAssets() {
         />
       )}
 
-      {/* Delete Confirmation */}
       <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
         <DialogTitle>Delete Asset</DialogTitle>
         <DialogContent>
